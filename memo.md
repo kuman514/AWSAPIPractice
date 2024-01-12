@@ -9,3 +9,28 @@
   - IAM 계정이 Cost and usage에 접근 가능한지 확인
 - 참고
   - [IAM 사용자 AWS 결제 대시보드 접근 설정 방법](https://byounghee.tistory.com/315)
+
+## 웹 페이지 배포하기
+- 과정: AWS Amplify + Git을 활용하여 진행
+  - 우선 AWS CLI와 사용할 IAM 계정의 액세스 키가 요구됨
+  - [AWS CLI 설치](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+  - IAM 계정의 액세스 키 생성하기
+    - AWS 콘솔의 우상단의 계정을 클릭하여 [보안 자격 증명] 메뉴로 이동
+    - 보안 자격 증명 설정 페이지에서 스크롤하여 [액세스 키] 항목으로 이동
+    - 새로운 액세스 키를 만들어 보안상으로 안전한 곳에 csv로 저장하거나 메모해둘 것
+  - 터미널에서 `aws configure` 커맨드 실행 후, 액세스 키와 비밀 액세스 키와 리전을 입력
+  - `aws s3 cp s3://wildrydes-us-east-1/WebApplication/1_StaticWebHosting/website ./ --recursive` 커맨드 실행
+  - 만들어놓은 GitHub 레포지토리에 해당 코드 push
+  - AWS Amplify를 GitHub 레포지토리와 연계하여 웹에 배포하기
+    - Amplify 콘솔에서 새로운 앱 만들기 (이 떄 [웹 앱 호스팅]으로 만들어줘야 함)
+    - [기존 코드에서] 항목 중 [GitHub] 선택
+    - (GitHub 계정에 연결되어 있지 않은 경우) 권한을 부여함으로써 연결
+    - 만들어놓은 GitHub 레포지토리 -> 메인 브랜치 선택
+    - (모노레포인 경우) 모노레포에 체크한 뒤 해당하는 디렉토리 입력
+    - [AWS Amplify가 프로젝트 루트 디렉터리에 호스팅된 모든 파일을 자동으로 배포하도록 허용] 체크
+    - 다음으로 넘어가 [저장 및 배포]
+  - AWS Amplify에서 확인된 배포 링크에 잘 들어가지는지 확인
+- 참고
+  - [AWS - 서버리스 웹 애플리케이션 구축 - 모듈 1: 지속적인 배포를 통한 정적 웹 호스팅](https://aws.amazon.com/ko/getting-started/hands-on/build-serverless-web-app-lambda-apigateway-s3-dynamodb-cognito/module-1/)
+  - [AWS - Install or update the latest version of the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+  - [AWS - Managing access keys for IAM users](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#Using_CreateAccessKey)
