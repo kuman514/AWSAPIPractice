@@ -34,3 +34,29 @@
   - [AWS - 서버리스 웹 애플리케이션 구축 - 모듈 1: 지속적인 배포를 통한 정적 웹 호스팅](https://aws.amazon.com/ko/getting-started/hands-on/build-serverless-web-app-lambda-apigateway-s3-dynamodb-cognito/module-1/)
   - [AWS - Install or update the latest version of the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
   - [AWS - Managing access keys for IAM users](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#Using_CreateAccessKey)
+
+## 사용자 풀 만들기
+- Amazon SES 설정 필요
+  - Amazon SES 콘솔 -> 구성 -> 확인된 자격 증명 -> 자격 증명 생성
+  - 자격 증명 세부 정보에서 [보안 인증 유형]을 [이메일 주소]로 선택
+  - 이메일 주소 입력 후, 전송된 확인 메일의 링크로 인증 절차 완료하기
+- Amazon Cognito 콘솔에서 [사용자 풀 생성]
+  - [로그인 환경 구성]의 [Cognito 사용자 풀 로그인 옵션] 섹션에서 [사용자 이름]을 선택 후 다음으로 넘어가기
+  - [보안 요구 사항 구성]에서 [암호 정책 모드]를 [Cognito 기본값]으로 유지 후 [MFA 없음]을 선택하고 다음으로 넘어가기
+  - [가입 환경 구성]은 건들지 않고 다음으로 넘어가기
+  - [메시지 전송 구성]에서 [이메일 공급자]가 [Amazon SES를 사용하여 이메일 전송 - 권장됨]으로 되어있는지 확인 후, [발신 이메일 주소]에서 Amazon SES에서 설정한 이메일 선택하고 다음으로 넘어가기
+  - [앱 통합]에서 사용자 풀 이름 짓기
+  - [초기 앱 클라이언트]에서 앱 클라이언트 이름 짓기
+  - [검토 및 생성]에서 사용자 풀 생성 완료하기
+- 상단의 과정에서 배포했던 웹 페이지의 [/js/config.js] 파일 편집하기
+  - Amazon Cognito 콘솔로 들어가 이전 과정에서 진행했던 사용자 풀 확인
+  - userPoolID: [사용자 풀 개요]의 사용자 풀 ID
+  - userPoolClientID: [앱 통합] > [앱 클라이언트 및 분석]에 있는 앱 클라이언트 ID
+  - region: [사용자 풀 개요]에서 [풀 ARN] 값 참고
+  - invokeUrl은 일단 비워둔다
+  - 파일 저장 후 커밋 푸시
+- 구현이 되었는지 확인
+  - AWS Amplify에 배포됐던 페이지에서 가입 진행 후 로그인 여부 확인
+- 참고
+  - [AWS - 서버리스 웹 애플리케이션 구축 - 모듈 2: 사용자 관리](https://aws.amazon.com/ko/getting-started/hands-on/build-serverless-web-app-lambda-apigateway-s3-dynamodb-cognito/module-2/)
+  - [Amazon SES에서 자격 증명 생성 및 확인 - 이메일 주소 자격 증명 생성](https://docs.aws.amazon.com/ko_kr/ses/latest/dg/creating-identities.html#verify-email-addresses-procedure)
