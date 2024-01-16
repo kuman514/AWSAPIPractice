@@ -60,3 +60,42 @@
 - 참고
   - [AWS - 서버리스 웹 애플리케이션 구축 - 모듈 2: 사용자 관리](https://aws.amazon.com/ko/getting-started/hands-on/build-serverless-web-app-lambda-apigateway-s3-dynamodb-cognito/module-2/)
   - [Amazon SES에서 자격 증명 생성 및 확인 - 이메일 주소 자격 증명 생성](https://docs.aws.amazon.com/ko_kr/ses/latest/dg/creating-identities.html#verify-email-addresses-procedure)
+
+## 서버리스 백엔드 환경 구성
+- Amazon DynamoDB 테이블 생성하기
+  - Amazon DynamoDB 콘솔에서 테이블 생성
+    - 테이블 이름, 파티션 키 입력
+    - 테이블 생성 버튼 클릭
+  - 테이블이 생성될 때까지 대기 (약간의 시간이 소요됨)
+  - 테이블이 생성된 뒤, 해당 테이블로 들어가 [개요] > [일반 정보] > [추가 정보]로 들어가 [ARN] 복사해두기
+- Lambda 함수를 위한 IAM 역할 생성
+  - 해당 Lambda 함수는 [CloudWatch Logs에 로그를 쓸 수 있는 권한]과 [DynamoDB 테이블에 항목을 쓸 수 있는 권한]이 필요함
+  - IAM 콘솔에서 [역할] 항목으로 들어가 [역할 생성]
+    - [신뢰할 수 있는 엔티티 유형]에서 [AWS 서비스] 선택 후, [사용 사례]에서 [Lambda] 선택하여 다음으로 넘어가기
+    - 선택할 수 있는 권한 중 [AWSLambdaBasicExecutionRole]을 선택하여 체크 후 다음으로 넘어가기
+    - 역할 이름을 지은 후 [역할 생성]
+  - IAM 콘솔에서 [역할]에서 방금 생성한 역할에 권한 추가
+    - 해당 역할을 선택한 후, [권한 추가]에서 [인라인 정책 생성]
+    - [서비스 선택]에서 [DynamoDB] 선택
+    - [작업 허용됨] 펼치기 (자습서는 "[작업 선택]을 선택합니다"라고 나와있으나, 실제론 [작업 허용됨]을 가리킴)
+    - [작업 허용됨]에서 제공되는 권한 중 [PutItem]의 체크박스에 체크
+    - [리소스]에서 [특정] 선택 후 [ARN 추가] 창을 열고 [텍스트] 탭으로 들어가, 이전 단계에서 복사했던 테이블의 ARN 붙여넣기
+    - 정책 이름을 짓고 [정책 생성] 버튼 누르기
+- 요청 처리용 Lambda 함수 생성
+  - AWS Lambda 콘솔에서 함수 생성하기
+    - 콘솔 우상단의 [함수 생성] 클릭
+    - [새로 작성] 선택 (자습서에는 [처음부터 새로 작성]이라고 나왔지만, 실제론 [새로 작성]이라고 나옴)
+    - 함수 이름, 런타임 등등 설정
+    - [기본 실행 역할 변경] 드롭다운에서 [기존 역할 사용] 선택
+    - 이전 과정에서 생성했던 역할 선택
+    - [함수 생성] 버튼 클릭
+  - 생성한 함수의 [코드 섹션]에서 코드 작성 후 [Deploy] 클릭 (자습서에는 [배포]라고 나왔지만, 실제론 [Deploy]라고 나옴)
+- 구현이 되었는지 확인
+  - 이전 과정에서 생성한 함수 선택 후 [코드 섹션]에서 [Test] 드롭다운 클릭 후 [Configure test event]로 진입
+  - [새 이벤트 생성] 선택 후 이벤트 필드 이름과 이벤트 JSON 작성
+  - [저장] 버튼으로 저장하기
+  - 다시 [코드 섹션]에서 [Test] 드롭다운 클릭 후, 해당 이벤트 선택
+  - [Test]를 클릭하여 테스트
+  - 결과가 의도한 대로 나왔는지 확인
+- 참고
+  - [AWS - 서버리스 웹 애플리케이션 구축 - 모듈 3: 서버리스 서비스 백엔드](https://aws.amazon.com/ko/getting-started/hands-on/build-serverless-web-app-lambda-apigateway-s3-dynamodb-cognito/module-3/)
