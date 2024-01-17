@@ -144,3 +144,15 @@
   - 웹 페이지 로그인 후 의도한 대로 동작하는지 확인
 - 참고
   - [AWS - 서버리스 웹 애플리케이션 구축 - 모듈 4: RESTful API 배포](https://aws.amazon.com/ko/getting-started/hands-on/build-serverless-web-app-lambda-apigateway-s3-dynamodb-cognito/module-4/)
+
+## 사용하지 않는 리소스 정리하는 방법
+- AWS Amplify 콘솔에서 앱 삭제
+- Amazon Cognito 콘솔에서 사용자 풀 삭제
+- AWS Lambda 콘솔에서 Lambda 함수 삭제
+- IAM 콘솔에서 역할 삭제
+- Amazon DynamoDB 콘솔에서 테이블 삭제
+  - 관련 모든 CloudWatch 경보도 삭제
+- Amazon API Gateway 콘솔에서 API 삭제
+- Amazon CloudWatch 콘솔에서 로그 그룹 삭제
+- 참고
+  - [AWS - 서버리스 웹 애플리케이션 구축 - 모듈 5: 리소스 정리](https://aws.amazon.com/ko/getting-started/hands-on/build-serverless-web-app-lambda-apigateway-s3-dynamodb-cognito/module-5/)
