@@ -156,3 +156,64 @@
 - Amazon CloudWatch 콘솔에서 로그 그룹 삭제
 - 참고
   - [AWS - 서버리스 웹 애플리케이션 구축 - 모듈 5: 리소스 정리](https://aws.amazon.com/ko/getting-started/hands-on/build-serverless-web-app-lambda-apigateway-s3-dynamodb-cognito/module-5/)
+
+## 보충: API Gateway에서 받은 파라미터를 Lambda 함수로 넘겨주는 방법
+- 메서드 요청
+  - 경로 요청은 Dynamic Path로 인해 자동으로 매핑됨.
+  - URL 쿼리 문자열 파라미터, HTTP 요청 헤더, 요청 본문은 메서드 요청 설정에서 [편집]하여 원하는 요청 파라미터를 직접 추가해야 함.
+- 통합 요청
+  - Lambda 함수의 event로 넘겨줄 데이터를 매핑할 템플릿을 작성한다.
+  - 매핑 템플릿 코드 예시 (출처: https://stackoverflow.com/questions/31372167/how-to-access-http-headers-for-request-to-aws-api-gateway-using-lambda)
+    ```
+    {
+      "method": "$context.httpMethod",
+      "body" : $input.json('$'),
+      "headers": {
+        #foreach($param in $input.params().header.keySet())
+        "$param": "$util.escapeJavaScript($input.params().header.get($param))" #if($foreach.hasNext),#end
+        #end
+      },
+      "queryParams": {
+        #foreach($param in $input.params().querystring.keySet())
+        "$param": "$util.escapeJavaScript($input.params().querystring.get($param))" #if($foreach.hasNext),#end
+        #end
+      },
+      "pathParams": {
+        #foreach($param in $input.params().path.keySet())
+        "$param": "$util.escapeJavaScript($input.params().path.get($param))" #if($foreach.hasNext),#end
+        #end
+      }  
+    }
+    ```
+  - 매핑에 쓰인 `$input` 변수를 알아보려면: https://docs.aws.amazon.com/ko_kr/apigateway/latest/developerguide/api-gateway-mapping-template-reference.html#input-variable-reference
+- Lambda 함수
+  - API Gateway에서의 매핑 템플릿을 기반으로, 핸들러 함수의 event 파라미터에 대해, `event.(매핑된 파라미터값)`에 접근.
+  - 예시, event가
+    ```
+    {
+      "body": $input.json('$'),
+      "params": {
+        #foreach($type in $allParams.keySet())
+          #set($params = $allParams.get($type))
+          "$type": {
+            #foreach($paramName in $params.keySet())
+            "$paramName": "$util.escapeJavaScript($params.get($paramName))"
+                #if($foreach.hasNext),#end
+            #end
+          }
+          #if($foreach.hasNext),#end
+        #end
+      }
+    }
+    ```
+    이 템플릿으로 매핑되었다면,
+    ```JavaScript
+    export const handler = async (event, context) => {
+      const { ... } = event.params.path;
+      const { ... } = event.params.header;
+      const { ... } = event.params.querystring;
+      const { ... } = event.body;
+      ...
+    };
+    ```
+    와 같이 `event`에서 매핑된 파라미터를 받아올 수 있다.
