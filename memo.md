@@ -217,3 +217,70 @@
     };
     ```
     와 같이 `event`에서 매핑된 파라미터를 받아올 수 있다.
+
+## 보충: Lambda 함수에서 DynamoDB UpdateItemCommand를 할 때 주의사항
+- UpdateExpression
+  - UpdateItemCommand는 UpdateExpression을 통해 속성값들을 갱신한다.
+  - UpdateExpression은 `<명령어> <식>[, <식>[, ...]] [<명령어> ...] ...`의 형태로 이루어진다.
+    - 예: `set #w = :newWhen, typeId = :newTypeId, stage = :newStage, score = :newScore remove specialTags`
+    - 참고: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.UpdateExpressions.html
+  - `when`이나 `comment`나 `timestamp`같이, 예약어로 정의되어 있어 UpdateExpression에 직접 써넣을 수 없는 단어가 많다.
+    - 그래서 이런 경우, 일단 UpdateExpression에는 `#w`나 `#c` 등 예약어를 피하는 식별자를 써넣은 다음, ExpressionAttributeNames를 통해 해당 식별자를 원하는 속성명으로 치환시켜야 에러가 없다.
+    - 예시 코드
+      ```JavaScript
+      const command = new UpdateItemCommand({
+        TableName: ...,
+        Key: {
+          ...,
+        },
+        UpdateExpression: 'set #w = :newWhen, #c = :newComment, typeId = :newTypeId, stage = :newStage, score = :newScore',
+        ExpressionAttributeNames: {
+          '#w': 'when',
+          '#c': 'comment',
+        },
+        ExpressionAttributeValues: {
+          ':newWhen': {
+            ...,
+          },
+          ':newComment': {
+            ...,
+          },
+          ':newTypeId': {
+            ...,
+          },
+          ':newStage': {
+            ...,
+          },
+          ':newScore': {
+            ...,
+          },
+        },
+      });
+      ```
+    - 참고
+      - https://stackoverflow.com/questions/48653365/update-attribute-timestamp-reserved-word
+      - https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ExpressionAttributeNames.html
+- ExpressionAttributeValues
+  - SS 타입(문자열 배열) 등의 콜렉션 타입 ExpressionAttributeValue에 빈 콜렉션을 넣을 수 없다.
+    - "One or more parameter values were invalid: An string set may not be empty" 라는 오류가 발생한다.
+    - 오류 발생 예시 코드
+    ```JavaScript
+    const command = new UpdateItemCommand({
+      TableName: ...,
+      Key: {
+        ...,
+      },
+      UpdateExpression: ...,
+      ExpressionAttributeValues: {
+        ...,
+        ':newCollection': {
+          SS: [], // 이 부분에서, 빈 콜렉션이 안 받아들여지는 오류가 발생한다.
+        },
+      },
+    });
+    ```
+    - DynamoDB 콘솔에서 직접 콜렉션 애트리뷰트값을 빈 콜렉션으로 만들어서 저장해도 똑같은 에러가 발생한다.
+    - 이 때, 콜렉션에 값을 하나라도 채우거나, 콜렉션 애트리뷰트를 아예 삭제하는 방법 등등으로 해결이 가능하다.
+    - 참고
+      - https://dynobase.dev/dynamodb-errors/expressionattributevalues-contains-invalid-value-one-or-more-parameter-values-were-invalid-an-attributevalue-may-not-contain-an-empty-string/
+      - https://dynobase.dev/dynamodb-errors/dynamodb-string-set-may-not-be-empty/
